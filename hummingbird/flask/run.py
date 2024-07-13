@@ -1,7 +1,8 @@
-from app import app
-from flask_restful import Api, Resource
+import os
+from app import create_app
 
-api = Api(app)
+app = create_app(os.getenv('FLASK_CONFIG') or 'default')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
