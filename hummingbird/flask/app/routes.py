@@ -1,4 +1,3 @@
-from app import app
 
 def initialize_routes(api, db):
     from flask_restful import Resource
