@@ -1,5 +1,8 @@
 import json
 
+from firebase_admin import firestore
+from datetime import datetime
+
 # JSON to Python object parser
 def parse_json(value):
     if isinstance (value, dict):
@@ -11,7 +14,8 @@ def parse_json(value):
     
     except json.JSONDecodeError:
         raise ValueError('Invalid JSON structure')
-    
+
+# String to Boolean parser 
 def parse_bool(value):
     if isinstance(value, bool):
         return value
@@ -24,3 +28,11 @@ def parse_bool(value):
     
     else:
         raise ValueError('Boolean value expected.')
+
+# Firestore timestamps to ISO 8601 string format parser
+def parse_timestamps(doc):
+
+    for key, value in doc.items():
+        if isinstance(value, datetime):
+            doc[key] = value.isoformat()
+    return doc

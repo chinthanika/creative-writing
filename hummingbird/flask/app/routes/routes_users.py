@@ -1,6 +1,9 @@
 from flask import Blueprint, request, jsonify
 from flask_restful import reqparse, Resource
-from .components import data_parser
+
+from datetime import datetime
+
+from ..components import data_parser
 
 def initializeUserRoutes(api, db):
     class CreateUser(Resource):
@@ -14,9 +17,13 @@ def initializeUserRoutes(api, db):
                 email = args['email']
 
                 try:
+                    # Add created_at timestamp
+                    created_at = datetime.now()
+
                     user_ref = db.collection('users').add({
                         'username': username,
-                        'email': email
+                        'email': email,
+                        'created_at': created_at
                     })
                     return {'message': 'User data added successfully', 'id': user_ref[1].id}, 201
                 except Exception as e:
@@ -51,6 +58,9 @@ def initializeUserRoutes(api, db):
                 update_data['selected_content'] = args['selected_content']
 
             try:
+                # Add updated_at timestamp
+                update_data['updated_at'] = datetime.now()
+
                 user_ref = db.collection('users').document(user_id)
                 user_doc = user_ref.get()
 
@@ -73,6 +83,7 @@ def initializeUserRoutes(api, db):
 
                 if user_doc.exists:
                     user_data = user_doc.to_dict()
+                    user_data = data_parser.parse_timestamps(user_data)
                     user_data['id'] = user_id
                     return user_data, 200
                 
@@ -100,6 +111,8 @@ def initializeUserRoutes(api, db):
                 user_data = None
                 for user in query:
                     user_data = user.to_dict()
+                    user_data = data_parser.parse_timestamps(user_data)
+                    
                     user_data['id'] = user.id
                     break
                 

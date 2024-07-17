@@ -1,6 +1,9 @@
 from flask import Blueprint, request, jsonify
 from flask_restful import reqparse, Resource
-from .components import data_parser
+
+from datetime import datetime
+
+from ..components import data_parser
 
 def initializeEntityRoutes(api, db):
     class CreateEntity(Resource):
@@ -24,6 +27,9 @@ def initializeEntityRoutes(api, db):
             entity_content = args['entity_content']
 
             try:
+                # Add created_at timestamp
+                created_at = datetime.now()
+
                 # Check if the entity_relations document exists, create it if it doesn't
                 entity_relations_ref = db.collection('users').document(user_id).collection('entity_relations').document('default')
                 entity_relations_doc = entity_relations_ref.get()
@@ -38,7 +44,8 @@ def initializeEntityRoutes(api, db):
                     'template_id': template_id,
                     'folder_id': folder_id,
                     'entity_description': entity_description,
-                    'entity_content': entity_content
+                    'entity_content': entity_content,
+                    'created_at': created_at
                 })
 
                 return {'message': 'Entity data added successfully', 'id': entity_ref[1].id}, 201
@@ -75,6 +82,9 @@ def initializeEntityRoutes(api, db):
                 update_data['entity_content'] = args['entity_content']
 
             try:
+                # Add updated_at timestamp
+                update_data['updated_at'] = datetime.now()
+                
                 entity_ref = db.collection('users').document(user_id).collection('entity_relations').document('default').collection('entities').document(entity_id)
                 entity_doc = entity_ref.get()
 

@@ -16,9 +16,9 @@ def create_app(config_name):
     api = Api(app)
 
     # Import and register blueprints/routes
-    from .routes_users import initializeUserRoutes
-    from .routes_entities import initializeEntityRoutes
-    from .routes_test import test_bp  # Import the test blueprint
+    from .routes.routes_users import initializeUserRoutes
+    from .routes.routes_entities import initializeEntityRoutes
+    from .routes.routes_test import test_bp  # Import the test blueprint
     initializeUserRoutes(api, db)
     initializeEntityRoutes(api, db)
     app.register_blueprint(test_bp)  # Register the test blueprint
