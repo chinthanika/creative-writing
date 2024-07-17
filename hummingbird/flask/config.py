@@ -9,7 +9,7 @@ class Config:
     def init_firebase():
         cred = credentials.Certificate(Config.FIREBASE_CREDENTIALS)
         initialize_app(cred, {
-            'storageBucket': 'gs://creative-writing-52ae6.appspot.com'
+            'storageBucket': 'creative-writing-52ae6.appspot.com'
         })
         return firestore.client(), storage.bucket()
 
