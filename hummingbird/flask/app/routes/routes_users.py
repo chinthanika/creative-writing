@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_restful import reqparse, Resource
 
+from google.cloud.firestore_v1.base_query import FieldFilter
+
 from datetime import datetime
 
 from ..components import data_parser
@@ -106,13 +108,13 @@ def initializeUserRoutes(api, db):
 
             try:
                 users_ref = db.collection('users')
-                query = users_ref.where(attribute, '==', value).stream()
+                query = users_ref.where(filter = FieldFilter(attribute, '==', value)).stream()
                 
                 user_data = None
                 for user in query:
                     user_data = user.to_dict()
                     user_data = data_parser.parse_timestamps(user_data)
-                    
+
                     user_data['id'] = user.id
                     break
                 

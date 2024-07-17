@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_restful import reqparse, Resource
 
+from google.cloud.firestore_v1.base_query import FieldFilter
+
 from datetime import datetime
 
 from ..components import data_parser
@@ -84,7 +86,7 @@ def initializeEntityRoutes(api, db):
             try:
                 # Add updated_at timestamp
                 update_data['updated_at'] = datetime.now()
-                
+
                 entity_ref = db.collection('users').document(user_id).collection('entity_relations').document('default').collection('entities').document(entity_id)
                 entity_doc = entity_ref.get()
 
@@ -100,14 +102,15 @@ def initializeEntityRoutes(api, db):
             
     class GetEntityByID(Resource):
         def get(self, user_id, entity_id):
-
             try:
                 entity_ref = db.collection('users').document(user_id).collection('entity_relations').document('default').collection('entities').document(entity_id)
                 entity_doc = entity_ref.get()
 
                 if entity_doc.exists:
                     entity_data = entity_doc.to_dict()
-                    entity_data['id'] = user_id
+                    entity_data = data_parser.parse_timestamps(entity_data)
+                    
+                    entity_data['id'] = entity_id
                     return entity_data, 200
                 
                 else:
@@ -128,11 +131,13 @@ def initializeEntityRoutes(api, db):
 
             try:
                 entity_ref = db.collection('users').document(user_id).collection('entity_relations').document('default').collection('entities')
-                query = entity_ref.where(attribute, '==', value).stream()
+                query = entity_ref.where(filter = FieldFilter(attribute, '==', value)).stream()
                 
                 entity_data = None
                 for entity in query:
                     entity_data = entity.to_dict()
+                    entity_data = data_parser.parse_timestamps(entity_data)
+
                     entity_data['id'] = entity.id
                     break
                 
@@ -140,6 +145,37 @@ def initializeEntityRoutes(api, db):
                     return entity_data, 200
                 else:
                     return {'message': 'Entity not found'}, 404
+
+            except Exception as e:
+                return {'message': f'An error occurred: {str(e)}'}, 500
+
+
+    class GetAllEntities(Resource):
+        def get(self, user_id):
+            try:
+                # Check if the entity_relations document exists
+                entity_relations_ref = db.collection('users').document(user_id).collection('entity_relations').document('default')
+                entity_relations_doc = entity_relations_ref.get()
+
+                if not entity_relations_doc.exists:
+                    return {'message': 'Entity relations document not found'}, 404
+
+                # Query all relations
+                entities_ref = entity_relations_ref.collection('entities')
+                query = entities_ref.stream()
+
+                entities_data = []
+                for entity in query:
+                    entity_data = entity.to_dict()
+                    entity_data = data_parser.parse_timestamps(entity_data)
+                    
+                    entity_data['id'] = entity.id
+                    entities_data.append(entity_data)
+
+                if entities_data:
+                    return entities_data, 200
+                else:
+                    return {'message': 'No entities found'}, 404
 
             except Exception as e:
                 return {'message': f'An error occurred: {str(e)}'}, 500
@@ -162,4 +198,5 @@ def initializeEntityRoutes(api, db):
     api.add_resource(UpdateEntity, '/update_entity/<string:user_id>/entities/<string:entity_id>')
     api.add_resource(GetEntityByID, '/get_entity/<string:user_id>/entities/<string:entity_id>')
     api.add_resource(GetEntityByAttribute, '/get_entity/<string:user_id>')
+    api.add_resource(GetAllEntities, '/get_entity/all/<string:user_id>')
     api.add_resource(DeleteEntity, '/delete_entity/<string:user_id>/entities/<string:entity_id>')
