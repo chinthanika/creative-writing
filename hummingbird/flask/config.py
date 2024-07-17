@@ -1,5 +1,5 @@
 import os
-from firebase_admin import credentials, initialize_app, firestore
+from firebase_admin import credentials, initialize_app, firestore, storage
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'secret-key'
@@ -8,8 +8,10 @@ class Config:
     @staticmethod
     def init_firebase():
         cred = credentials.Certificate(Config.FIREBASE_CREDENTIALS)
-        initialize_app(cred)
-        return firestore.client()
+        initialize_app(cred, {
+            'storageBucket': 'gs://creative-writing-52ae6.appspot.com'
+        })
+        return firestore.client(), storage.bucket()
 
 class DevelopmentConfig(Config):
     DEBUG = True
@@ -21,8 +23,10 @@ class TestingConfig(Config):
     @staticmethod
     def init_firebase():
         cred = credentials.Certificate(TestingConfig.FIREBASE_CREDENTIALS)
-        initialize_app(cred)
-        return firestore.client()
+        initialize_app(cred, {
+            'storageBucket': 'gs://creative-writing-52ae6.appspot.com'
+        })
+        return firestore.client(), storage.bucket()
 
 class ProductionConfig(Config):
     DEBUG = False

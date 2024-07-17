@@ -10,7 +10,7 @@ def create_app(config_name):
     app.config.from_object(config[config_name])
 
     # Initialize Firebase using the config
-    db = config[config_name].init_firebase()
+    firestore_client, storage_bucket = config[config_name].init_firebase()
 
     # Initialize Flask-RESTful API
     api = Api(app)
@@ -21,9 +21,9 @@ def create_app(config_name):
     from .routes.routes_relations import initializeRelationRoutes
 
     from .routes.routes_test import test_bp  # Import the test blueprint
-    initializeUserRoutes(api, db)
-    initializeEntityRoutes(api, db)
-    initializeRelationRoutes(api, db)
+    initializeUserRoutes(api, firestore_client)
+    initializeEntityRoutes(api, firestore_client)
+    initializeRelationRoutes(api, firestore_client)
 
     app.register_blueprint(test_bp)  # Register the test blueprint
 
