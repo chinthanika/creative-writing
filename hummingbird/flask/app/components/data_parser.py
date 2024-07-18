@@ -14,20 +14,23 @@ def parse_json(value):
     
     except json.JSONDecodeError:
         raise ValueError('Invalid JSON structure')
+    
+# JSON to Markdown parser
+def json_md_parser(json_value):
+    markdown = ""
+    for key, value in json_value.items():
+        markdown += f"**{key.capitalize()}**: {value}\n\n"
+    return markdown
 
 # String to Boolean parser 
 def parse_bool(value):
     if isinstance(value, bool):
         return value
     
-    if value.lower() in ['true', '1', 't', 'y', 'yes']:
-        return True
+    if isinstance(value, str):
+        return value.lower() in ('true', '1', 't', 'y', 'yes')
     
-    elif value.lower() in ['false', '0', 'f', 'n', 'no']:
-        return False
-    
-    else:
-        raise ValueError('Boolean value expected.')
+    return False
 
 # Firestore timestamps to ISO 8601 string format parser
 def parse_timestamps(doc):

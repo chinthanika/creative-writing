@@ -6,7 +6,7 @@ from datetime import datetime
 
 from ..components import data_parser
 
-def initializeRelationRoutes(api, db):
+def initializeRelationRoutes(api, firestore_client):
     class CreateRelation(Resource):
         def post(self, user_id):
             parser = reqparse.RequestParser()
@@ -26,7 +26,7 @@ def initializeRelationRoutes(api, db):
                 created_at = datetime.now()
                 
                 # Check if the entity_relations document exists, create it if it doesn't
-                entity_relations_ref = db.collection('users').document(user_id).collection('entity_relations').document('default')
+                entity_relations_ref = firestore_client.collection('users').document(user_id).collection('entity_relations').document('default')
                 entity_relations_doc = entity_relations_ref.get()
 
                 if not entity_relations_doc.exists:
@@ -84,7 +84,7 @@ def initializeRelationRoutes(api, db):
                 update_data['updated_at'] = datetime.now()
 
                 # Check if the entity_relations document exists, create it if it doesn't
-                entity_relations_ref = db.collection('users').document(user_id).collection('entity_relations').document('default')
+                entity_relations_ref = firestore_client.collection('users').document(user_id).collection('entity_relations').document('default')
                 entity_relations_doc = entity_relations_ref.get()
 
                 if not entity_relations_doc.exists:
@@ -125,7 +125,7 @@ def initializeRelationRoutes(api, db):
     class GetRelationByID(Resource):
         def get(self, user_id, relation_id):
             try:
-                relation_ref = db.collection('users').document(user_id).collection('entity_relations').document('default').collection('relations').document(relation_id)
+                relation_ref = firestore_client.collection('users').document(user_id).collection('entity_relations').document('default').collection('relations').document(relation_id)
                 relation_doc = relation_ref.get()
 
                 if relation_doc.exists:
@@ -151,7 +151,7 @@ def initializeRelationRoutes(api, db):
                 return {'message': 'Attribute and value query parameters are required'}, 400
             
             # Check if the entity_relations document exists, create it if it doesn't
-            entity_relations_ref = db.collection('users').document(user_id).collection('entity_relations').document('default')
+            entity_relations_ref = firestore_client.collection('users').document(user_id).collection('entity_relations').document('default')
             entity_relations_doc = entity_relations_ref.get()
 
             
@@ -190,7 +190,7 @@ def initializeRelationRoutes(api, db):
         def get(self, user_id):
             try:
                 # Check if the entity_relations document exists
-                entity_relations_ref = db.collection('users').document(user_id).collection('entity_relations').document('default')
+                entity_relations_ref = firestore_client.collection('users').document(user_id).collection('entity_relations').document('default')
                 entity_relations_doc = entity_relations_ref.get()
 
                 if not entity_relations_doc.exists:
@@ -219,7 +219,7 @@ def initializeRelationRoutes(api, db):
     class DeleteRelation(Resource):
         def delete(self, user_id, relation_id):
             try:
-                relation_ref = db.collection('users').document(user_id).collection('entity_relations').document('default').collection('relations').document(relation_id)
+                relation_ref = firestore_client.collection('users').document(user_id).collection('entity_relations').document('default').collection('relations').document(relation_id)
                 relation_doc = relation_ref.get()
 
                 if not relation_doc.exists:

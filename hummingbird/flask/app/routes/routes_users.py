@@ -7,7 +7,7 @@ from datetime import datetime
 
 from ..components import data_parser
 
-def initializeUserRoutes(api, db):
+def initializeUserRoutes(api, firestore_client):
     class CreateUser(Resource):
             def post(self):
                 parser = reqparse.RequestParser()
@@ -22,7 +22,7 @@ def initializeUserRoutes(api, db):
                     # Add created_at timestamp
                     created_at = datetime.now()
 
-                    user_ref = db.collection('users').add({
+                    user_ref = firestore_client.collection('users').add({
                         'username': username,
                         'email': email,
                         'created_at': created_at
@@ -63,7 +63,7 @@ def initializeUserRoutes(api, db):
                 # Add updated_at timestamp
                 update_data['updated_at'] = datetime.now()
 
-                user_ref = db.collection('users').document(user_id)
+                user_ref = firestore_client.collection('users').document(user_id)
                 user_doc = user_ref.get()
 
                 if not user_doc.exists:
@@ -80,7 +80,7 @@ def initializeUserRoutes(api, db):
     class GetUserById(Resource):
         def get(self, user_id):
             try:
-                users_ref = db.collection('users').document(user_id)
+                users_ref = firestore_client.collection('users').document(user_id)
                 user_doc = users_ref.get()
 
                 if user_doc.exists:
@@ -107,7 +107,7 @@ def initializeUserRoutes(api, db):
                 return {'message': 'Attribute and value query parameters are required'}, 400
 
             try:
-                users_ref = db.collection('users')
+                users_ref = firestore_client.collection('users')
                 query = users_ref.where(filter = FieldFilter(attribute, '==', value)).stream()
                 
                 user_data = None
@@ -129,7 +129,7 @@ def initializeUserRoutes(api, db):
     class DeleteUser(Resource):
         def delete(self, user_id):
             try:
-                user_ref = db.collection('users').document(user_id)
+                user_ref = firestore_client.collection('users').document(user_id)
                 user_doc = user_ref.get()
 
                 if not user_doc.exists:
