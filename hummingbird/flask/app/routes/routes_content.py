@@ -9,7 +9,7 @@ from urllib.parse import unquote
 
 import requests
 
-from ..components import data_parser
+from ..components import data_parser, storage_access
 
 def initializeContentRoutes(api, firestore_client, storage_bucket):
     class CreateContent(Resource):
@@ -189,40 +189,9 @@ def initializeContentRoutes(api, firestore_client, storage_bucket):
     class DownloadContent(Resource):
         def get(self, user_id, content_id):
             try:
-                # Retrieve the file URL
-                content_ref = firestore_client.collection('users').document(user_id).collection('content').document(content_id)
-                content_doc = content_ref.get()
-                if not content_doc.exists:
-                    return {'message': 'Content not found'}, 404
-                
-                file_url = content_doc.get('file_url')
-                if not file_url:
-                    return {'message': 'File URL not found in document'}, 404
-                
-                # Extract the relative file path from the URL
-                file_path = file_url.replace(f'https://storage.googleapis.com/{storage_bucket.name}/', '')
-                
-                # URL-decode the file path to ensure it's correct
-                decoded_file_path = unquote(file_path)
+                content = storage_access.content_download(user_id, content_id, firestore_client, storage_bucket)
 
-                # Debugging: Print the file path to verify correctness
-                print(f'Decoded file path: {decoded_file_path}')
-
-                # Generate a signed URL for the file
-                blob = storage_bucket.blob(decoded_file_path)
-                signed_url = blob.generate_signed_url(expiration=timedelta(minutes=15))
-
-                # Debugging: Print the signed URL to verify correctness
-                print(f'Signed URL: {signed_url}')
-
-                # Send a GET request to the signed URL
-                response = requests.get(signed_url)
-                print(response)
-                if response.status_code == 200:
-                    # Serve the content directly in the response
-                    return make_response(response.content, 200, {'Content-Type': 'text/markdown'})
-                else:
-                    return {'message': f'Failed to download content: {response.status_code}'}, 400
+                return make_response(content, 200, {'Content-Type': 'text/markdown'})
             except Exception as e:
                 return {'message': f'An error occurred: {str(e)}'}, 500
             

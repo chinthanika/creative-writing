@@ -21,13 +21,21 @@ def create_app(config_name):
     from .routes.routes_relations import initializeRelationRoutes
     from .routes.routes_content import initializeContentRoutes
     from .routes.routes_feedback import initializeFeedbackRoutes
+    from .routes.routes_responses import initializeResponsesRoutes
+    from .routes.routes_goals import initializeGoalsRoutes
+    from .routes.routes_progress import initializeProgressRoutes
+    from .routes.routes_tasks import intitializeTaskRoutes
 
     from .routes.routes_test import test_bp  # Import the test blueprint
     initializeUserRoutes(api, firestore_client)
     initializeFeedbackRoutes(api, firestore_client)
+    initializeResponsesRoutes(api, firestore_client)
     initializeRelationRoutes(api, firestore_client)
+    initializeGoalsRoutes(api, firestore_client)
+    intitializeTaskRoutes(api, firestore_client)
     initializeContentRoutes(api, firestore_client, storage_bucket)
     initializeEntityRoutes(api, firestore_client, storage_bucket)
+    initializeProgressRoutes(api, firestore_client, storage_bucket)
 
     app.register_blueprint(test_bp)  # Register the test blueprint
 

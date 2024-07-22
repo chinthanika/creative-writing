@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 import requests
 
-from ..components import data_parser, image_access
+from ..components import data_parser, storage_access
 
 def initializeEntityRoutes(api, firestore_client, storage_bucket):
     class CreateEntity(Resource):
