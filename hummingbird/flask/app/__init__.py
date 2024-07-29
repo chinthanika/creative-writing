@@ -26,6 +26,7 @@ def create_app(config_name):
     from .routes.routes_progress import initializeProgressRoutes
     from .routes.routes_tasks import intitializeTaskRoutes
     from .routes.routes_notebooks import initializeNotebookRoutes
+    from .routes.routes_chat import initializeChatRoutes
 
     from .routes.routes_test import test_bp  # Import the test blueprint
     initializeUserRoutes(api, firestore_client)
@@ -35,6 +36,7 @@ def create_app(config_name):
     initializeGoalsRoutes(api, firestore_client)
     intitializeTaskRoutes(api, firestore_client)
     initializeNotebookRoutes(api, firestore_client)
+    initializeChatRoutes(api, firestore_client)
     initializeContentRoutes(api, firestore_client, storage_bucket)
     initializeEntityRoutes(api, firestore_client, storage_bucket)
     initializeProgressRoutes(api, firestore_client, storage_bucket)
